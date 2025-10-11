@@ -1,73 +1,17 @@
 // script.js
 document.addEventListener('DOMContentLoaded', function() {
     let myChart = null;
-    let portfolio = [];
+    let portfolio = []; // 포트폴리오 상태 관리 배열: {symbol, name, weight}
     let isUpdating = false;
-
-    // --- [신규] 예시 데이터를 담고 있는 함수 ---
-    function getExampleData() {
-        return {
-            "summary": {
-                "final_portfolio_value": 150000.00, "total_investment": 50000.00, "final_roi": 2.00,
-                "mdd": {"percentage": -0.25, "peak_date": "2022-01-01", "trough_date": "2022-06-30", "peak_value": 120000, "trough_value": 90000},
-                "rolling_returns": null
-            },
-            "logs": [
-                {"date": "2020-01-31", "type": "TRANSACTION", "action": "INITIAL_BUY", "ticker": "SPY", "shares": 20, "price": 300, "amount": 6000, "fee": 15},
-                {"date": "2020-01-31", "type": "TRANSACTION", "action": "INITIAL_BUY", "ticker": "AGG", "shares": 36, "price": 110, "amount": 3960, "fee": 9.9}
-            ],
-            "results": [
-                {
-                    "date": "2020-01-31", "portfolio_value": 9984.90, "total_investment": 10000, "roi": -0.0015, "cash": 15.10,
-                    "assets": {
-                        "SPY": {"holdings": 20, "price": 300, "value": 6000, "weight": 0.601},
-                        "AGG": {"holdings": 36, "price": 110, "value": 3960, "weight": 0.399}
-                    }
-                },
-                // ... (실제 데이터는 더 많겠지만 예시를 위해 축약)
-                {
-                    "date": "2024-12-31", "portfolio_value": 150000, "total_investment": 50000, "roi": 2.00, "cash": 1000,
-                     "assets": {
-                        "SPY": {"holdings": 150, "price": 600, "value": 90000, "weight": 0.60},
-                        "AGG": {"holdings": 500, "price": 120, "value": 60000, "weight": 0.40}
-                    }
-                }
-            ],
-            "chart_data": {
-                "labels": ["2020-01-31", "2020-02-29", "...", "2024-12-31"],
-                "datasets": {
-                    "portfolio_value": [9984.90, 10500, 120000, 150000],
-                    "total_investment": [10000, 11000, 49000, 50000],
-                    "roi": [-0.0015, 0.05, 1.4, 2.0]
-                }
-            }
-        };
-    }
-
-    // --- [신규] 초기 예시 차트를 렌더링하는 함수 ---
-    function showInitialExample() {
-        const exampleData = getExampleData();
-        renderChart(exampleData);
-        renderHoldingsTable(exampleData.results);
-        renderLogs(exampleData.logs);
-        // 예시에서는 롤링 리턴은 숨김 처리
-        document.querySelector('.rolling-returns-container').style.display = 'none';
-        document.getElementById('status').textContent = '예시 데이터입니다. 옵션을 설정하고 백테스트를 실행하세요.';
-    }
-
-    // --- 페이지 로드 시 실행 ---
-    showInitialExample(); // 페이지가 로드되면 예시 차트를 바로 보여줍니다.
-    
-    // --- (이하 코드는 이전과 동일) ---
 
     const backtestForm = document.getElementById('backtestForm');
     const searchInput = document.getElementById('symbolSearch');
     
-    // 초기 슬라이더 설정
+    // 페이지 로드 시 초기 슬라이더 설정
     portfolio = [
-        { ticker: '133690', weight: 0.6 },
-        { ticker: '102110', weight: 0.2 },
-        { ticker: '005930', weight: 0.2 }
+        { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 0.6 },
+        { symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 0.2 },
+        { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 0.2 }
     ];
     renderSliders();
     
@@ -76,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitButton = document.getElementById('submitButton');
         const statusEl = document.getElementById('status');
         
-        const stocks = portfolio.flatMap(p => [p.ticker, p.weight.toFixed(4)]);
+        const stocks = portfolio.flatMap(p => [p.symbol, p.weight.toFixed(4)]);
         const rollingWindowInput = document.getElementById('rolling_window').value;
 
         const backtestParams = {
@@ -134,17 +78,30 @@ document.addEventListener('DOMContentLoaded', function() {
             const searchUrl = `https://mini.jellypo.pe.kr/be/search-symbols?q=${query}`;
             const response = await fetch(searchUrl);
             if (!response.ok) { throw new Error('Search API request failed'); }
-            const data = await response.json();
+            const responseData = await response.json();
+            const data = Array.isArray(responseData) ? responseData : responseData.results;
+            
             searchResults.innerHTML = '';
+            if (!data) {
+                searchResults.innerHTML = '<li>검색 결과가 없습니다.</li>';
+                return;
+            }
+
             data.forEach(item => {
                 const li = document.createElement('li');
                 li.textContent = `${item.Name} (${item.Symbol})`;
                 li.addEventListener('click', function() {
                     const symbolToAdd = item.Symbol;
-                    if (portfolio.find(p => p.ticker === symbolToAdd)) {
+                    if (portfolio.find(p => p.symbol === symbolToAdd)) {
                         alert("이미 추가된 종목입니다."); return;
                     }
-                    portfolio.push({ ticker: symbolToAdd, weight: 0 });
+                    
+                    portfolio.push({ 
+                        symbol: symbolToAdd,
+                        name: item.Name,
+                        weight: 0 
+                    });
+
                     const equalWeight = 1 / portfolio.length;
                     portfolio.forEach(p => p.weight = equalWeight);
                     renderSliders();
@@ -167,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
             itemDiv.className = 'slider-item';
             const weightPercent = (item.weight * 100).toFixed(1);
             itemDiv.innerHTML = `
-                <span>${item.ticker}</span>
+                <span title="${item.name} (${item.symbol})">${item.name}</span>
                 <input type="range" min="0" max="100" value="${weightPercent}" step="0.1" data-index="${index}">
                 <div style="position: relative; display: flex; align-items: center;">
                     <input type="number" min="0" max="100" value="${weightPercent}" step="0.1" data-index="${index}">
@@ -188,24 +145,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function handleSliderChange(event) {
         if (isUpdating) return;
-        const index = parseInt(event.target.dataset.index, 10);
-        let newWeight = parseFloat(event.target.value) / 100;
-        updateWeights(index, newWeight);
+        updateWeights(parseInt(event.target.dataset.index, 10), parseFloat(event.target.value) / 100);
     }
 
     function handleInputChange(event) {
         if (isUpdating) return;
-        const index = parseInt(event.target.dataset.index, 10);
-        let newWeight = parseFloat(event.target.value) / 100;
-        updateWeights(index, newWeight);
+        updateWeights(parseInt(event.target.dataset.index, 10), parseFloat(event.target.value) / 100);
     }
 
     function handleRemoveItem(event) {
-        const index = parseInt(event.target.dataset.index, 10);
-        portfolio.splice(index, 1);
+        portfolio.splice(parseInt(event.target.dataset.index, 10), 1);
         if (portfolio.length > 0) {
             const totalWeight = portfolio.reduce((sum, p) => sum + p.weight, 0);
-            portfolio.forEach(p => p.weight = p.weight / totalWeight);
+            if (totalWeight > 0) {
+                portfolio.forEach(p => p.weight = p.weight / totalWeight);
+            } else {
+                const equalWeight = 1 / portfolio.length;
+                portfolio.forEach(p => p.weight = equalWeight);
+            }
         }
         renderSliders();
     }
@@ -221,8 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const otherTotalWeight = otherItems.reduce((sum, p) => sum + p.weight, 0);
         if (otherTotalWeight > 0) {
             otherItems.forEach(item => {
-                let adjustment = delta * (item.weight / otherTotalWeight);
-                item.weight -= adjustment;
+                item.weight -= delta * (item.weight / otherTotalWeight);
             });
         }
         const finalTotalWeight = portfolio.reduce((sum, p) => sum + Math.max(0, p.weight), 0);
@@ -244,6 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const headerRow = tableHead.insertRow();
         headerRow.insertCell().textContent = '날짜';
         headerRow.insertCell().textContent = '총 평가액';
+        headerRow.insertCell().textContent = '수익률';
         headerRow.insertCell().textContent = '현금';
         tickers.forEach(ticker => {
             headerRow.insertCell().textContent = `${ticker} 보유수`;
@@ -251,13 +208,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         results.forEach(record => {
             const row = tableBody.insertRow();
+            const returnRate = (record.portfolio_value / record.total_investment) - 1;
             row.insertCell().textContent = record.date;
-            row.insertCell().textContent = record.portfolio_value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            row.insertCell().textContent = record.cash.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            row.insertCell().textContent = Math.round(record.portfolio_value).toLocaleString();
+            row.insertCell().textContent = (returnRate * 100).toFixed(2) + '%';
+            row.insertCell().textContent = Math.round(record.cash).toLocaleString();
             tickers.forEach(ticker => {
                 const asset = record.assets[ticker];
                 row.insertCell().textContent = asset.holdings;
-                row.insertCell().textContent = asset.value.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                row.insertCell().textContent = Math.round(asset.value).toLocaleString();
             });
         });
     }
@@ -283,12 +242,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!logs || !Array.isArray(logs)) return;
         logs.forEach(log => {
             const row = logTableBody.insertRow();
-            const cellDate = row.insertCell();
-            const cellType = row.insertCell();
-            const cellDetails = row.insertCell();
+            const cellDate = row.insertCell(), cellType = row.insertCell(), cellDetails = row.insertCell();
             cellDate.textContent = log.date || '';
-            let typeText = log.type;
-            let detailsText = log.message || '';
+            let typeText = log.type, detailsText = log.message || '';
             if (log.type === 'DEPOSIT') {
                 typeText = '입금';
                 detailsText = `추가 투자금 ${log.amount.toLocaleString()} 입금`;
@@ -311,37 +267,56 @@ document.addEventListener('DOMContentLoaded', function() {
         const results = responseData.results;
         const assetTickers = results.length > 0 ? Object.keys(results[0].assets) : [];
         const colorPalette = ['rgba(255, 99, 132, 0.3)', 'rgba(54, 162, 235, 0.3)', 'rgba(255, 206, 86, 0.3)', 'rgba(75, 192, 192, 0.3)', 'rgba(153, 102, 255, 0.3)', 'rgba(255, 159, 64, 0.3)'];
-        const weightDatasets = assetTickers.map((ticker, index) => ({
-            label: `${ticker} Weight`, data: results.map(r => r.assets[ticker].weight),
-            fill: true, backgroundColor: colorPalette[index % colorPalette.length],
-            borderColor: 'rgba(0,0,0,0)', yAxisID: 'y2', pointRadius: 0,
-        }));
+
+        // [수정] 자산 비중 데이터셋의 label을 '종목명 (티커)' 형식으로 변경
+        const nameMap = Object.fromEntries(portfolio.map(p => [p.symbol, p.name]));
+        
+        const weightDatasets = assetTickers.map((ticker, index) => {
+            const displayName = nameMap[ticker] || ticker; // portfolio에 이름이 없으면 티커를 사용
+            return {
+                label: `${displayName} (${ticker})`,
+                data: results.map(r => r.assets[ticker].weight),
+                fill: true, 
+                backgroundColor: colorPalette[index % colorPalette.length],
+                borderColor: 'rgba(0,0,0,0)', 
+                yAxisID: 'y2', 
+                pointRadius: 0,
+            };
+        });
+
         const datasets = [
             { label: 'Portfolio Value', data: chartData.datasets.portfolio_value, borderColor: 'royalblue', yAxisID: 'y' },
             { label: 'Total Investment', data: chartData.datasets.total_investment, borderColor: 'red', borderDash: [5, 5], yAxisID: 'y' },
             ...weightDatasets,
             { label: 'ROI', data: chartData.datasets.roi, borderColor: 'green', yAxisID: 'y1', type: 'line', fill: false }
         ];
+
         const config = {
             type: 'line', data: { labels: chartData.labels, datasets: datasets },
             options: {
                 responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
                 scales: {
                     y: { type: 'logarithmic', position: 'left', display: true, title: { display: true, text: 'Amount (Log Scale)' }},
-                    y1: { type: 'logarithmic', position: 'right', display: true, title: { display: true, text: 'ROI (%)' },
+                    y1: { type: 'linear', position: 'right', display: true, title: { display: true, text: 'ROI (%)' },
                         ticks: { callback: value => (value * 100).toFixed(0) + '%' },
                         grid: { drawOnChartArea: false }
                     },
                     y2: { type: 'linear', position: 'right', stacked: true, display: false, min: 0, max: 1 }
                 },
-                plugins: { legend: { labels: { filter: item => !item.text.includes('Weight') } } }
+                plugins: { 
+                    // [수정] 범례 필터를 제거하여 모든 항목이 표시되도록 함
+                    legend: { 
+                        labels: { 
+                            // 모든 범례 항목을 표시
+                        } 
+                    } 
+                }
             }
         };
         const ctx = document.getElementById('backtestChart');
-        if (myChart) {
-            myChart.destroy();
-        }
+        if (myChart) { myChart.destroy(); }
         myChart = new Chart(ctx, config);
         document.getElementById('chartTitle').innerText = '백테스트 결과';
     }
 });
+
