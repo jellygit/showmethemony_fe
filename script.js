@@ -253,6 +253,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 const actionMap = {'BUY': '매수', 'SELL_ALL': '전량 매도', 'SELL_ADJUST': '비중조절 매도', 'PERIODIC_BUY': '추가 매수', 'SWEEP_BUY': '잔여 현금 매수', 'INITIAL_BUY': '초기 매수'};
                 const action = actionMap[log.action] || log.action;
                 detailsText = `${log.ticker}: ${log.shares}주 ${action} (비용: ${log.amount.toLocaleString()}, 수수료/비용: ${log.fee.toFixed(2)})`;
+            } else if (log.type === 'DIVIDEND') {
+                typeText = '배당';
+                detailsText = `배당금 ${log.amount.toLocaleString()} 입금`;
             } else if (log.type === 'INFO') {
                 typeText = '정보';
             }
