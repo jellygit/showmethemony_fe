@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
             interval: document.getElementById('interval').value,
             periodic_investment: parseFloat(document.getElementById('periodic_investment').value),
             no_rebalance: document.getElementById('no_rebalance').checked,
+            no_drip: document.getElementById('no_drip').checked,
             stocks: stocks.length > 0 ? stocks : null,
             rolling_window: rollingWindowInput ? parseInt(rollingWindowInput, 10) : null,
             rolling_step: document.getElementById('rolling_step').value
