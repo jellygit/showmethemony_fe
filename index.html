@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>$how me the money</h1>
+    <h1>포트폴리오 백테스트</h1>
     <div class="container">
         <div class="form-container">
             <h3>설정</h3>
@@ -22,7 +22,7 @@
                 <div class="stock-section">
                     <h4>종목 및 비중</h4>
                     <div id="sliders-container"></div>
-                    
+                    <!-- 저장/공유 버튼 제거 -->
                     <h4>종목 검색</h4>
                     <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
                     <ul id="search-results"></ul>
@@ -31,25 +31,25 @@
                 <label for="start_date">시작일:</label>
                 <input type="date" id="start_date" value="2010-01-01">
                 <label for="end_date">종료일:</label>
-                <input type="date" id="end_date" value="2025-10-10">
+                <input type="date" id="end_date">
                 <label for="capital">초기 투자금:</label>
-                <input type="number" id="capital" value="500000">
+                <input type="number" id="capital" value="10000">
                 <label for="periodic_investment">주기별 추가 투자금:</label>
-                <input type="number" id="periodic_investment" value="100000">
+                <input type="number" id="periodic_investment" value="1000">
                 <label for="interval">리밸런싱 주기:</label>
                 <select id="interval">
-                    <option value="1ME">매월 (1M)</option>
-                    <option value="3ME" selected>매분기 (3M)</option>
-                    <option value="6ME">매반기 (6M)</option>
+                    <option value="1M">매월 (1M)</option>
+                    <option value="3M" selected>매분기 (3M)</option>
+                    <option value="6M">매반기 (6M)</option>
                     <option value="1Y">매년 (1Y)</option>
                 </select>
                 <label for="no_rebalance">리밸런싱 안함:</label>
                 <input type="checkbox" id="no_rebalance" style="width: auto;">
-                <label for="no_drip">배당 재투자 안함:</label>
-                <input type="checkbox" id="no_drip" style="width: auto;">
+                <label for="reinvest_dividends">배당 재투자:</label>
+                <input type="checkbox" id="reinvest_dividends" style="width: auto;" checked>
                 <hr>
                 <label for="rolling_window">롤링 기간 (연):</label>
-                <input type="number" id="rolling_window" placeholder="예: 3 (미입력 시 계산 안함)" value="3">
+                <input type="number" id="rolling_window" placeholder="예: 3 (미입력 시 계산 안함)">
                 <label for="rolling_step">롤링 주기:</label>
                 <select id="rolling_step">
                     <option value="1Y" selected>매년 (1Y)</option>
@@ -96,7 +96,10 @@
         </table>
     </div>
 
+    <!-- 공유 모달 제거 -->
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="script.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
+
