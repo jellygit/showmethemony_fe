@@ -28,7 +28,6 @@
                         <button type="button" id="loadPortfolioBtn">불러오기</button>
                         <button type="button" id="sharePortfolioBtn">공유하기</button>
                     </div>
-                    
                     <h4>종목 검색</h4>
                     <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
                     <ul id="search-results"></ul>
@@ -38,24 +37,24 @@
                 <input type="date" id="start_date" value="2021-01-01">
                 <label for="end_date">종료일:</label>
                 <input type="date" id="end_date" value="2025-10-10">
+                
+                <!-- [수정] type을 'text'로 변경하고 inputmode 추가 -->
                 <label for="capital">초기 투자금:</label>
-                <input type="number" id="capital" value="500000">
+                <input type="text" id="capital" value="500,000" inputmode="numeric">
                 <label for="periodic_investment">주기별 추가 투자금:</label>
-                <input type="number" id="periodic_investment" value="500000">
+                <input type="text" id="periodic_investment" value="500,000" inputmode="numeric">
+
                 <label for="interval">리밸런싱 주기:</label>
                 <select id="interval">
-                    <option value="1ME">매월 (1M)</option>
-                    <option value="3ME" selected>매분기 (3M)</option>
-                    <option value="6ME">매반기 (6M)</option>
+                    <option value="1M">매월 (1M)</option>
+                    <option value="3M" selected>매분기 (3M)</option>
+                    <option value="6M">매반기 (6M)</option>
                     <option value="1Y">매년 (1Y)</option>
                 </select>
                 <label for="no_rebalance">리밸런싱 안함:</label>
                 <input type="checkbox" id="no_rebalance" style="width: auto;">
-                
-                <!-- [수정] 라벨과 id를 'no_drip'으로 변경하고, checked 속성 제거 -->
                 <label for="no_drip">배당 재투자 안 함:</label>
                 <input type="checkbox" id="no_drip" style="width: auto;">
-
                 <hr>
                 <label for="rolling_window">롤링 기간 (연):</label>
                 <input type="number" id="rolling_window" placeholder="예: 3 (미입력 시 계산 안함)" value="3">
@@ -63,7 +62,7 @@
                 <select id="rolling_step">
                     <option value="1Y" selected>매년 (1Y)</option>
                     <option value="1Q">매분기 (1Q)</option>
-                    <option value="1ME">매월 (1M)</option>
+                    <option value="1M">매월 (1M)</option>
                 </select>
                 <hr>
                 <button type="submit" id="submitButton">백테스트 실행</button>
@@ -75,7 +74,8 @@
             <canvas id="backtestChart"></canvas>
         </div>
     </div>
-
+    
+    <!-- 이하 HTML 구조는 변경 없음 -->
     <div class="holdings-container" style="display: none;">
         <h3>포트폴리오 현황</h3>
         <table id="holdingsTable">
@@ -83,7 +83,6 @@
             <tbody id="holdingsTableBody"></tbody>
         </table>
     </div>
-
     <div class="rolling-returns-container" style="display: none;">
         <h3>롤링 리턴 (Rolling Returns)</h3>
         <table id="rollingReturnsTable">
@@ -94,7 +93,6 @@
         </table>
         <div id="rollingReturnsSummary"></div>
     </div>
-
     <div class="log-container">
         <h3>백테스트 로그</h3>
         <table id="logTable">
@@ -104,7 +102,6 @@
             <tbody id="logTableBody"></tbody>
         </table>
     </div>
-
     <div id="shareModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <span class="modal-close-btn">&times;</span>

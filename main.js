@@ -20,6 +20,25 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
+    // --- [신규] 화폐 입력 포맷팅 관련 ---
+    const capitalInput = document.getElementById('capital');
+    const periodicInvestmentInput = document.getElementById('periodic_investment');
+
+    function formatCurrency(inputElement) {
+        let value = inputElement.value;
+        // 숫자 이외의 문자(쉼표 포함) 모두 제거
+        const numberValue = parseInt(value.replace(/[^0-9]/g, ''), 10);
+        if (isNaN(numberValue)) {
+            inputElement.value = '';
+        } else {
+            // 세 자리마다 쉼표 추가
+            inputElement.value = numberValue.toLocaleString();
+        }
+    }
+    capitalInput.addEventListener('input', () => formatCurrency(capitalInput));
+    periodicInvestmentInput.addEventListener('input', () => formatCurrency(periodicInvestmentInput));
+    // ------------------------------------
+
     await portfolioManager.initializePortfolio();
     ui.renderSliders(portfolioManager.getPortfolio(), sliderEventHandlers);
     ui.showInitialExample();
@@ -35,23 +54,37 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.querySelector('.modal-close-btn').addEventListener('click', () => ui.toggleModal(false));
     document.getElementById('copyUrlBtn').addEventListener('click', ui.copyShareUrl);
 
+
     async function handleBacktestSubmit(event) {
         event.preventDefault();
         const submitButton = document.getElementById('submitButton');
         const statusEl = document.getElementById('status');
         
+        // --- [수정] 쉼표를 제거하고 숫자로 변환 ---
+        const capitalValue = parseFloat(capitalInput.value.replace(/,/g, '')) || 0;
+        const periodicInvestmentValue = parseFloat(periodicInvestmentInput.value.replace(/,/g, '')) || 0;
+
+        if (capitalValue <= 0 && periodicInvestmentValue <= 0) {
+            alert("초기 투자금 또는 주기별 추가 투자금 중 하나는 0보다 커야 합니다.");
+            return;
+        }
+        
+        let intervalValue = document.getElementById('interval').value;
+        if (intervalValue.endsWith('M')) {
+            intervalValue = intervalValue.replace('M', 'ME');
+        }
+        
         const stocks = portfolioManager.getPortfolio().flatMap(p => [p.symbol, p.weight.toFixed(4)]);
         const rollingWindowInput = document.getElementById('rolling_window').value;
 
         const backtestParams = {
-            capital: parseFloat(document.getElementById('capital').value),
+            capital: capitalValue,
             start_date: document.getElementById('start_date').value,
             end_date: document.getElementById('end_date').value || null,
             strategy: document.getElementById('strategy').value,
-            interval: document.getElementById('interval').value,
-            periodic_investment: parseFloat(document.getElementById('periodic_investment').value),
+            interval: intervalValue,
+            periodic_investment: periodicInvestmentValue,
             no_rebalance: document.getElementById('no_rebalance').checked,
-            // [수정] 'reinvest_dividends' 대신 'no_drip' 파라미터로 전송
             no_drip: document.getElementById('no_drip').checked,
             stocks: stocks.length > 0 ? stocks : null,
             rolling_window: rollingWindowInput ? parseInt(rollingWindowInput, 10) : null,
@@ -77,26 +110,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    async function handleSymbolSearch(event) {
-        const query = event.target.value;
-        if (query.length < 2) {
-            ui.renderSearchResults([]);
-            return;
-        }
-        try {
-            const responseData = await api.searchSymbols(query);
-            const searchData = Array.isArray(responseData) ? responseData : responseData.results;
+    let debounceTimer;
+    function handleSymbolSearch(event) {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(async () => {
+            const query = event.target.value;
+            if (query.length < 2) {
+                ui.renderSearchResults([]);
+                return;
+            }
+            try {
+                const responseData = await api.searchSymbols(query);
+                const searchData = Array.isArray(responseData) ? responseData : responseData.results;
 
-            ui.renderSearchResults(searchData, (item) => {
-                if (portfolioManager.addStock(item)) {
-                    ui.renderSliders(portfolioManager.getPortfolio(), sliderEventHandlers);
-                }
-                document.getElementById('search-results').innerHTML = '';
-                event.target.value = '';
-            });
-        } catch (error) {
-            console.error(error);
-        }
+                ui.renderSearchResults(searchData, (item) => {
+                    if (portfolioManager.addStock(item)) {
+                        ui.renderSliders(portfolioManager.getPortfolio(), sliderEventHandlers);
+                    }
+                    document.getElementById('search-results').innerHTML = '';
+                    event.target.value = '';
+                });
+            } catch (error) {
+                console.error(error);
+            }
+        }, 300);
     }
 
     function handleShare() {

@@ -23,12 +23,14 @@ export async function initializePortfolio() {
                     name: detailMap[item.s] || item.s,
                     weight: item.w
                 }));
+                console.log("포트폴리오를 URL에서 복원했습니다.");
                 return;
             }
         } catch (e) {
             console.error("URL 파라미터 파싱/복원 오류:", e);
         }
     }
+    // URL 파라미터가 없거나 실패 시 localStorage에서 로드
     loadPortfolio();
 }
 
@@ -36,12 +38,15 @@ export function loadPortfolio() {
     const saved = localStorage.getItem('myPortfolio');
     if (saved) {
         portfolio = JSON.parse(saved);
+        console.log("저장된 포트폴리오를 불러왔습니다.");
     } else {
+        // 저장된 포트폴리오가 없으면 기본값 사용
         portfolio = [
             { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 0.6 },
             { symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 0.2 },
             { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 0.2 }
         ];
+        console.log("기본 포트폴리오를 로드합니다.");
     }
 }
 
@@ -58,7 +63,7 @@ export function addStock(item) {
 export function removeStock(index) {
     portfolio.splice(index, 1);
     rebalanceWeights();
-    savePortfolio(false); // 자동 저장 (알림 없음)
+    savePortfolio(false);
 }
 
 export function updateWeight(changedIndex, newWeight) {
@@ -76,7 +81,7 @@ export function updateWeight(changedIndex, newWeight) {
     }
     normalizeWeights();
     isUpdating = false;
-    savePortfolio(false); // 자동 저장 (알림 없음)
+    savePortfolio(false);
 }
 
 function rebalanceWeights() {
@@ -97,6 +102,8 @@ export function savePortfolio(showAlert = true) {
     if(portfolio.length > 0) {
         localStorage.setItem('myPortfolio', JSON.stringify(portfolio));
         if(showAlert) alert('현재 포트폴리오가 브라우저에 저장되었습니다.');
+    } else {
+        if(showAlert) alert('저장할 포트폴리오가 없습니다.');
     }
 }
 
