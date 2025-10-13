@@ -20,3 +20,13 @@ export async function searchSymbols(query) {
     return response.json();
 }
 
+export async function fetchSymbolDetails(symbols) {
+    const response = await fetch(`${API_BASE_URL}/symbol-details`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symbols: symbols })
+    });
+    if (!response.ok) { throw new Error('Symbol details request failed'); }
+    return response.json();
+}
+

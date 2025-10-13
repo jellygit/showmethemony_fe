@@ -118,7 +118,6 @@ export function renderLogs(logs, portfolio = []) {
     logTableBody.innerHTML = '';
     if (!logs || !Array.isArray(logs)) return;
 
-    // [수정] portfolio 배열을 기반으로 symbol-name 맵 생성
     const nameMap = Object.fromEntries(portfolio.map(p => [p.symbol, p.name]));
 
     logs.forEach(log => {
@@ -134,9 +133,9 @@ export function renderLogs(logs, portfolio = []) {
             const actionMap = {'BUY': '매수', 'SELL_ALL': '전량 매도', 'SELL_ADJUST': '비중조절 매도', 'PERIODIC_BUY': '추가 매수', 'SWEEP_BUY': '잔여 현금 매수', 'INITIAL_BUY': '초기 매수'};
             const action = actionMap[log.action] || log.action;
             detailsText = `${log.ticker}: ${log.shares}주 ${action} (비용: ${log.amount.toLocaleString()}, 수수료/비용: ${log.fee.toFixed(2)})`;
-        } else if (log.type === 'DIVIDEND') { // [수정] 배당 로그 처리
+        } else if (log.type === 'DIVIDEND') {
             typeText = '배당';
-            const name = nameMap[log.ticker] || log.ticker; // 이름 찾기, 없으면 티커 사용
+            const name = nameMap[log.ticker] || log.ticker;
             detailsText = `${name}: ${log.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
         } else if (log.type === 'INFO') {
             typeText = '정보';
@@ -214,7 +213,6 @@ export function showInitialExample() {
     };
     renderChart(exampleData, examplePortfolio);
     renderHoldingsTable(exampleData.results);
-    // [수정] 예시 로그 렌더링 시에도 포트폴리오 정보 전달
     renderLogs(exampleData.logs, examplePortfolio);
     rollingContainer.style.display = 'none';
     statusEl.textContent = '예시 데이터입니다. 옵션을 설정하고 백테스트를 실행하세요.';

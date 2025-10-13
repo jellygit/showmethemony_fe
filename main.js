@@ -20,12 +20,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     };
 
-    // 초기화
     await portfolioManager.initializePortfolio();
     ui.renderSliders(portfolioManager.getPortfolio(), sliderEventHandlers);
     ui.showInitialExample();
 
-    // 이벤트 리스너 연결
     document.getElementById('backtestForm').addEventListener('submit', handleBacktestSubmit);
     document.getElementById('symbolSearch').addEventListener('input', handleSymbolSearch);
     document.getElementById('savePortfolioBtn').addEventListener('click', portfolioManager.savePortfolio);
@@ -36,7 +34,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('sharePortfolioBtn').addEventListener('click', handleShare);
     document.querySelector('.modal-close-btn').addEventListener('click', () => ui.toggleModal(false));
     document.getElementById('copyUrlBtn').addEventListener('click', ui.copyShareUrl);
-
 
     async function handleBacktestSubmit(event) {
         event.preventDefault();
@@ -54,7 +51,8 @@ document.addEventListener('DOMContentLoaded', async function() {
             interval: document.getElementById('interval').value,
             periodic_investment: parseFloat(document.getElementById('periodic_investment').value),
             no_rebalance: document.getElementById('no_rebalance').checked,
-            reinvest_dividends: document.getElementById('reinvest_dividends').checked,
+            // [수정] 'reinvest_dividends' 대신 'no_drip' 파라미터로 전송
+            no_drip: document.getElementById('no_drip').checked,
             stocks: stocks.length > 0 ? stocks : null,
             rolling_window: rollingWindowInput ? parseInt(rollingWindowInput, 10) : null,
             rolling_step: document.getElementById('rolling_step').value
@@ -68,7 +66,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             const responseData = await api.fetchBacktestData(backtestParams);
             ui.renderChart(responseData, portfolioManager.getPortfolio());
             ui.renderHoldingsTable(responseData.results);
-            // [수정] renderLogs 함수에 현재 포트폴리오 정보를 함께 전달합니다.
             ui.renderLogs(responseData.logs, portfolioManager.getPortfolio());
             ui.renderRollingReturns(responseData.summary.rolling_returns);
             statusEl.textContent = '백테스트 완료!';

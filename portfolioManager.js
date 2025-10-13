@@ -1,16 +1,48 @@
 // portfolioManager.js
-let portfolio = [];
+import { fetchSymbolDetails } from './api.js';
+
+let portfolio = []; // {symbol, name, weight}
 let isUpdating = false;
 
 export function getPortfolio() { return portfolio; }
 
-export function initializePortfolio() {
-    // 저장/공유 기능이 없으므로, 기본값만 설정
-    portfolio = [
-        { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 0.6 },
-        { symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 0.2 },
-        { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 0.2 }
-    ];
+export async function initializePortfolio() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const portfolioParam = urlParams.get('p');
+
+    if (portfolioParam) {
+        try {
+            const decoded = decodeURIComponent(window.atob(portfolioParam));
+            const sharedPortfolio = JSON.parse(decoded);
+            const symbols = sharedPortfolio.map(item => item.s);
+            if (symbols.length > 0) {
+                const details = await fetchSymbolDetails(symbols);
+                const detailMap = Object.fromEntries(details.map(d => [d.Symbol, d.Name]));
+                portfolio = sharedPortfolio.map(item => ({
+                    symbol: item.s,
+                    name: detailMap[item.s] || item.s,
+                    weight: item.w
+                }));
+                return;
+            }
+        } catch (e) {
+            console.error("URL 파라미터 파싱/복원 오류:", e);
+        }
+    }
+    loadPortfolio();
+}
+
+export function loadPortfolio() {
+    const saved = localStorage.getItem('myPortfolio');
+    if (saved) {
+        portfolio = JSON.parse(saved);
+    } else {
+        portfolio = [
+            { symbol: 'VTI', name: 'Vanguard Total Stock Market ETF', weight: 0.6 },
+            { symbol: 'VXUS', name: 'Vanguard Total International Stock ETF', weight: 0.2 },
+            { symbol: 'BND', name: 'Vanguard Total Bond Market ETF', weight: 0.2 }
+        ];
+    }
 }
 
 export function addStock(item) {
@@ -19,12 +51,14 @@ export function addStock(item) {
     }
     portfolio.push({ symbol: item.Symbol, name: item.Name, weight: 0 });
     rebalanceWeights();
+    savePortfolio(false); // 자동 저장 (알림 없음)
     return true;
 }
 
 export function removeStock(index) {
     portfolio.splice(index, 1);
     rebalanceWeights();
+    savePortfolio(false); // 자동 저장 (알림 없음)
 }
 
 export function updateWeight(changedIndex, newWeight) {
@@ -42,6 +76,7 @@ export function updateWeight(changedIndex, newWeight) {
     }
     normalizeWeights();
     isUpdating = false;
+    savePortfolio(false); // 자동 저장 (알림 없음)
 }
 
 function rebalanceWeights() {
@@ -56,5 +91,22 @@ function normalizeWeights() {
     if (total > 0) {
         portfolio.forEach(p => p.weight = Math.max(0, p.weight) / total);
     }
+}
+
+export function savePortfolio(showAlert = true) {
+    if(portfolio.length > 0) {
+        localStorage.setItem('myPortfolio', JSON.stringify(portfolio));
+        if(showAlert) alert('현재 포트폴리오가 브라우저에 저장되었습니다.');
+    }
+}
+
+export function generateShareUrl() {
+    if (portfolio.length === 0) return null;
+    const shortPortfolio = portfolio.map(p => ({ s: p.symbol, w: p.weight }));
+    const encoded = window.btoa(encodeURIComponent(JSON.stringify(shortPortfolio)));
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('p', encoded);
+    return url.href;
 }
 
