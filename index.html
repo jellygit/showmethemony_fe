@@ -24,99 +24,133 @@
                     <h4>종목 및 비중</h4>
                     <div id="sliders-container"></div>
                     <div class="portfolio-actions">
-                        <button type="button" id="savePortfolioBtn">SAVE</button>
-                        <button type="button" id="loadPortfolioBtn">LOAD</button>
-                        <button type="button" id="sharePortfolioBtn">SHARE</button>
-                    </div>
-                    <h4>종목 검색</h4>
-                    <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
-                    <ul id="search-results"></ul>
-                </div>
+              <button type="button" id="savePortfolioBtn">현재 포트폴리오 저장</button>
+              <button type="button" id="loadPortfolioBtn">불러오기</button>
+              <button type="button" id="sharePortfolioBtn">공유하기</button>
+            </div>
+            <h4>종목 검색</h4>
+            <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
+            <ul id="search-results"></ul>
+          </div>
 
-                <label for="start_date">시작일:</label>
-                <input type="date" id="start_date" value="2021-01-01">
-                <label for="end_date">종료일:</label>
-                <input type="date" id="end_date" value="2025-10-10">
-                
-                <!-- [수정] type을 'text'로 변경하고 inputmode 추가 -->
-                <label for="capital">초기 투자금:</label>
-                <input type="text" id="capital" value="500,000" inputmode="numeric">
-                <label for="periodic_investment">주기별 추가 투자금:</label>
-                <input type="text" id="periodic_investment" value="500,000" inputmode="numeric">
+          <label for="start_date">시작일:</label>
+          <input type="date" id="start_date" value="2010-01-01">
+          <label for="end_date">종료일:</label>
+          <input type="date" id="end_date">
+          <script>
+          // id가 'end_date'인 input 요소를 선택합니다.
+          const dateInput = document.getElementById('end_date');
 
-                <label for="interval">리밸런싱 주기:</label>
-                <select id="interval">
-                    <option value="1M">매월 (1M)</option>
-                    <option value="3M" selected>매분기 (3M)</option>
-                    <option value="6M">매반기 (6M)</option>
-                    <option value="1Y">매년 (1Y)</option>
-                </select>
-                <label for="no_rebalance">리밸런싱 안함:</label>
-                <input type="checkbox" id="no_rebalance" style="width: auto;">
-                <label for="no_drip">배당 재투자 안 함:</label>
-                <input type="checkbox" id="no_drip" style="width: auto;">
-                <hr>
-                <label for="rolling_window">롤링 기간 (연):</label>
-                <input type="number" id="rolling_window" placeholder="예: 3 (미입력 시 계산 안함)" value="3">
-                <label for="rolling_step">롤링 주기:</label>
-                <select id="rolling_step">
-                    <option value="1Y" selected>매년 (1Y)</option>
-                    <option value="1Q">매분기 (1Q)</option>
-                    <option value="1M">매월 (1M)</option>
-                </select>
-                <hr>
-                <button type="submit" id="submitButton">백테스트 실행</button>
-                <p id="status"></p>
-            </form>
-        </div>
-        <div class="chart-container">
-            <h3 id="chartTitle">결과 차트</h3>
-            <canvas id="backtestChart"></canvas>
-        </div>
+          // 오늘 날짜를 나타내는 Date 객체를 생성합니다.
+          const today = new Date();
+
+          // YYYY-MM-DD 형식으로 변환합니다.
+          // toISOString()은 'YYYY-MM-DDTHH:mm:ss.sssZ' 형식을 반환하므로,
+          // 앞의 10자리만 잘라내어 사용합니다.
+          const formattedDate = today.toISOString().slice(0, 10);
+
+          // input 요소의 value 값을 오늘 날짜로 설정합니다.
+          dateInput.value = formattedDate;
+
+          console.log(dateInput.value); // 예: '2025-10-18'
+          </script>
+
+          <!-- [수정] type을 'text'로 변경하고 inputmode 추가 -->
+          <label for="capital">초기 투자금:</label>
+          <input type="text" id="capital" value="500,000" inputmode="numeric">
+          <label for="periodic_investment">주기별 추가 투자금:</label>
+          <input type="text" id="periodic_investment" value="500,000" inputmode="numeric">
+
+          <label for="interval">리밸런싱 주기:</label>
+          <select id="interval">
+            <option value="1M">매월 (1M)</option>
+            <option value="3M" selected>매분기 (3M)</option>
+            <option value="6M">매반기 (6M)</option>
+            <option value="1Y">매년 (1Y)</option>
+          </select>
+          <label for="no_rebalance">리밸런싱 안함:</label>
+          <input type="checkbox" id="no_rebalance" style="width: auto;">
+          <label for="no_drip">배당 재투자 안 함:</label>
+          <input type="checkbox" id="no_drip" style="width: auto;">
+          <hr>
+          <label for="rolling_window">롤링 기간 (연):</label>
+          <input type="number" id="rolling_window" placeholder="예: 3 (미입력 시 계산 안함)" value="3">
+          <label for="rolling_step">롤링 주기:</label>
+          <select id="rolling_step">
+            <option value="1Y" selected>매년 (1Y)</option>
+            <option value="1Q">매분기 (1Q)</option>
+            <option value="1M">매월 (1M)</option>
+          </select>
+          <hr>
+          <button type="submit" id="submitButton">백테스트 실행</button>
+          <p id="status"></p>
+        </form>
+      </div>
+      <div class="chart-container">
+        <h3 id="chartTitle">결과 차트</h3>
+        <canvas id="backtestChart"></canvas>
+      </div>
     </div>
-    
+
     <!-- 이하 HTML 구조는 변경 없음 -->
     <div class="holdings-container" style="display: none;">
-        <h3>포트폴리오 현황</h3>
-        <table id="holdingsTable">
-            <thead id="holdingsTableHeader"></thead>
-            <tbody id="holdingsTableBody"></tbody>
-        </table>
+      <h3>포트폴리오 현황</h3>
+      <table id="holdingsTable">
+        <thead id="holdingsTableHeader"></thead>
+        <tbody id="holdingsTableBody"></tbody>
+      </table>
     </div>
     <div class="rolling-returns-container" style="display: none;">
-        <h3>롤링 리턴 (Rolling Returns)</h3>
-        <table id="rollingReturnsTable">
-            <thead>
-                <tr><th>시작일</th><th>종료일</th><th>연평균수익률 (CAGR)</th></tr>
-            </thead>
-            <tbody id="rollingReturnsTableBody"></tbody>
-        </table>
-        <div id="rollingReturnsSummary"></div>
+      <h3>롤링 리턴 (Rolling Returns)</h3>
+      <table id="rollingReturnsTable">
+        <thead>
+          <tr><th>시작일</th><th>종료일</th><th>연평균수익률 (CAGR)</th></tr>
+        </thead>
+        <tbody id="rollingReturnsTableBody"></tbody>
+      </table>
+      <div id="rollingReturnsSummary"></div>
     </div>
     <div class="log-container">
-        <h3>백테스트 로그</h3>
-        <table id="logTable">
-            <thead>
-                <tr><th>날짜</th><th>이벤트 종류</th><th>상세 내용</th></tr>
-            </thead>
-            <tbody id="logTableBody"></tbody>
-        </table>
+      <h3>백테스트 로그</h3>
+      <table id="logTable">
+        <thead>
+          <tr><th>날짜</th><th>이벤트 종류</th><th>상세 내용</th></tr>
+        </thead>
+        <tbody id="logTableBody"></tbody>
+      </table>
     </div>
     <div id="shareModal" class="modal-overlay" style="display: none;">
-        <div class="modal-content">
-            <span class="modal-close-btn">&times;</span>
-            <h3>포트폴리오 공유</h3>
-            <p>아래 URL을 복사하여 다른 사람에게 공유하세요.</p>
-            <div class="share-url-container">
-                <input type="text" id="shareUrlInput" readonly>
-                <button id="copyUrlBtn">복사</button>
-            </div>
-            <div id="qrcode"></div>
+      <div class="modal-content">
+        <span class="modal-close-btn">&times;</span>
+        <h3>포트폴리오 공유</h3>
+        <p>아래 URL을 복사하여 다른 사람에게 공유하세요.</p>
+        <div class="share-url-container">
+          <input type="text" id="shareUrlInput" readonly>
+          <button id="copyUrlBtn">복사</button>
         </div>
+        <div id="qrcode"></div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="main.js"></script>
-</body>
+    <hr>
+    면책 조항 (Disclaimer)
+    <br>
+    <br>
+    1. 정보의 목적: 본 웹사이트에서 제공하는 모든 정보, 데이터, 백테스팅 결과 및 분석 자료는 오직 교육적 및 정보 제공 목적으로만 사용되어야 합니다. 이는 어떠한 경우에도 특정 금융 상품의 매수 또는 매도를 권유하거나 투자 자문을 제공하는 것으로 해석될 수 없습니다.
+    <br>
+    <br>
+    2. 데이터의 한계 및 정확성: 본 시뮬레이터가 사용하는 금융 데이터(주가, 배당 등)는 외부 데이터 제공업체로부터 수집된 것으로, '있는 그대로(as-is)' 제공됩니다. 데이터의 정확성, 완전성, 최신성을 보장하지 않으며, 데이터 제공업체의 오류나 수집 과정에서의 기술적 문제로 인해 정보가 부정확하거나 누락될 수 있습니다. 시뮬레이션 결과는 이러한 데이터의 한계에 영향을 받습니다.
+    <br>
+    <br>
+    3. 백테스팅의 본질적 한계: 백테스팅 결과는 과거 데이터를 기반으로 한 모의 성과이며, 미래의 실제 투자 수익률을 절대로 보장하지 않습니다. 과거의 성과가 미래의 성과를 나타내지 않는다는 점을 명심하시기 바랍니다. 또한, 본 프로그램 자체에 의도치 않은 버그나 로직상의 오류가 존재할 수 있으며, 거래 비용(수수료, 세금) 등은 실제와 다를 수 있어 시뮬레이션 결과에 오차가 발생할 수 있습니다.
+    <br>
+    <br>
+    4. 투자 책임: 모든 투자 결정에 대한 최종적인 판단과 책임은 전적으로 사용자 본인에게 있습니다. 본 웹사이트의 운영자는 제공된 정보나 시뮬레이션 결과를 기반으로 한 사용자의 투자 행위로 인해 발생하는 어떠한 형태의 직접적 또는 간접적 손실이나 손해에 대해서도 법적 책임을 지지 않습니다.
+    <br>
+    <br>
+    본 서비스를 이용하시는 것은 상기 면책 조항에 동의하는 것으로 간주합니다.
+  </body>
 </html>
 
