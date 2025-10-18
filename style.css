@@ -1,6 +1,6 @@
 /* style.css */
 body { font-family: sans-serif; margin: 2em; }
-.container { display: grid; grid-template-columns: max(500px, 40%) 1fr; gap: 2em; }
+.container { display: grid; grid-template-columns: max(300px, 30%) 1fr; gap: 2em; }
 .form-container {}
 .chart-container { position: relative; height: 600px; }
 form { display: grid; grid-template-columns: 140px 1fr; gap: 10px; align-items: center; }
