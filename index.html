@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
+  <head>
     <meta charset="UTF-8">
-    <title>$how me the money</title>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>포트폴리오 백테스트</h1>
-    <div class="container">
-        <div class="form-container">
-            <h3>설정</h3>
-            <form id="backtestForm">
-                <label for="strategy">전략:</label>
-                <select id="strategy">
-                    <option value="default" selected>정적 비중 (Default)</option>
-                    <option value="laa">LAA</option>
-                    <option value="haa">HAA</option>
-                    <option value="daa">DAA</option>
-                </select>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CV 페이지 (수정됨)</title>
 
-                <div class="stock-section">
-                    <h4>종목 및 비중</h4>
-                    <div id="sliders-container"></div>
-                    <div class="portfolio-actions">
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+
+    <div class="container">
+
+      <div class="form-container">
+        <h3>설정</h3>
+        <form id="backtestForm">
+          <label for="strategy">전략:</label>
+          <select id="strategy">
+            <option value="default" selected>정적 비중 (Default)</option>
+            <option value="laa">LAA</option>
+            <option value="haa">HAA</option>
+            <option value="daa">DAA</option>
+          </select>
+
+          <div class="stock-section">
+            <h4>종목 및 비중</h4>
+            <div id="sliders-container"></div>
+            <h4>종목 검색</h4>
+            <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
+            <ul id="search-results"></ul>
+
+            <div class="portfolio-actions">
               <button type="button" id="savePortfolioBtn">현재 포트폴리오 저장</button>
               <button type="button" id="loadPortfolioBtn">불러오기</button>
               <button type="button" id="sharePortfolioBtn">공유하기</button>
             </div>
-            <h4>종목 검색</h4>
-            <input type="search" id="symbolSearch" placeholder="종목명 입력 (예: Apple)">
-            <ul id="search-results"></ul>
           </div>
 
           <label for="start_date">시작일:</label>
@@ -86,11 +89,26 @@
           <p id="status"></p>
         </form>
       </div>
-      <div class="chart-container">
-        <h3 id="chartTitle">결과 차트</h3>
-        <canvas id="backtestChart"></canvas>
-      </div>
-    </div>
+
+      <div class="right-column-wrapper">
+
+        <div class="chart-container">
+          <h3 id="chartTitle">결과 차트</h3>
+          <canvas id="backtestChart"></canvas>
+        </div>
+        <br><br>
+        <div class="help-container">
+          <h3><a href="menual.html">도움말</a></h3>
+          <p>링크 클릭하면 사이트에 대한 소개, 도움말이 있습니다.</p>
+          <ul>
+            <li>매월 월말 매수/매도</li>
+            <li>수수료, 슬리피지 고려하여 매수/매도 시 0.25% 차감</li>
+            <li>'리밸런싱 안함' 선택 시, 기간 내 신규 상장 주식 매수를 하지 않으니 주의</li>
+          </ul>
+        </div>
+
+      </div> 
+    </div> 
 
     <!-- 이하 HTML 구조는 변경 없음 -->
     <div class="holdings-container" style="display: none;">
@@ -151,6 +169,6 @@
     <br>
     <br>
     본 서비스를 이용하시는 것은 상기 면책 조항에 동의하는 것으로 간주합니다.
+
   </body>
 </html>
-
